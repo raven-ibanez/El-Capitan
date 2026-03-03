@@ -1,17 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Ramen Yard Custom Styles */
-/* Minimal helpers for ramen palette when needed outside tailwind tokens */
-.bg-ramen-cream { background-color: #FFF3E0; }
-.bg-ramen-beige { background-color: #F7E7CE; }
-.text-ramen-red { color: #D7263D; }
-.text-ramen-dark { color: #0B0A0A; }
-.border-ramen-sesame { border-color: #D1C7B7; }
-.ring-ramen-gold { --tw-ring-color: #E0A106; }
+/* ── eL Capitan Brand CSS ─────────────────────────────── */
+:root {
+  --captain-navy: #0A1628;
+  --captain-blue: #1E3A5F;
+  --captain-cyan: #00D4E8;
+  --captain-gold: #F5C518;
+  --captain-red: #E63946;
+  --captain-white: #F0F8FF;
+}
 
-/* Hide scrollbar for mobile nav */
+body {
+  background-color: var(--captain-navy);
+  color: var(--captain-white);
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+/* Force inputs to always be readable on dark backgrounds */
+input,
+textarea,
+select {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #d1d5db;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Captain token helpers */
+.bg-captain-navy {
+  background-color: var(--captain-navy);
+}
+
+.bg-captain-blue {
+  background-color: var(--captain-blue);
+}
+
+.bg-captain-cyan {
+  background-color: var(--captain-cyan);
+}
+
+.bg-captain-gold {
+  background-color: var(--captain-gold);
+}
+
+.text-captain-cyan {
+  color: var(--captain-cyan);
+}
+
+.text-captain-gold {
+  color: var(--captain-gold);
+}
+
+.text-captain-white {
+  color: var(--captain-white);
+}
+
+.border-captain-cyan {
+  border-color: var(--captain-cyan);
+}
+
+.border-captain-gold {
+  border-color: var(--captain-gold);
+}
+
+/* Ramen alias shims — keeps Admin dashboard compiling */
+.bg-ramen-cream {
+  background-color: #F0F8FF;
+}
+
+.bg-ramen-beige {
+  background-color: #A8D8EA;
+}
+
+.text-ramen-red {
+  color: #E63946;
+}
+
+.text-ramen-dark {
+  color: #0A1628;
+}
+
+.border-ramen-sesame {
+  border-color: #1E3A5F;
+}
+
+.ring-ramen-gold {
+  --tw-ring-color: #F5C518;
+}
+
+/* Hide scrollbar */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -21,18 +106,56 @@
   display: none;
 }
 
-/* Image loading optimization */
+/* Image rendering */
 img {
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
 }
 
-/* Preload critical images */
-.preload-image {
+/* Ripple / wave bg effect */
+.wave-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.wave-bg::before,
+.wave-bg::after {
   content: '';
   position: absolute;
-  left: -9999px;
-  top: -9999px;
-  width: 1px;
-  height: 1px;
+  border-radius: 50%;
+  opacity: 0.06;
+  animation: wave 8s ease-in-out infinite;
+}
+
+.wave-bg::before {
+  width: 600px;
+  height: 600px;
+  background: var(--captain-cyan);
+  top: -200px;
+  left: -150px;
+}
+
+.wave-bg::after {
+  width: 500px;
+  height: 500px;
+  background: var(--captain-gold);
+  bottom: -200px;
+  right: -100px;
+  animation-delay: -3s;
+}
+
+@keyframes wave {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -20px) scale(1.05);
+  }
+
+  66% {
+    transform: translate(-20px, 15px) scale(0.95);
+  }
 }

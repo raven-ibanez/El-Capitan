@@ -4,27 +4,42 @@ export default {
   theme: {
     extend: {
       colors: {
+        captain: {
+          navy: '#0A1628',
+          blue: '#1E3A5F',
+          cyan: '#00D4E8',
+          gold: '#F5C518',
+          red: '#E63946',
+          light: '#A8D8EA',
+          white: '#F0F8FF',
+        },
+        /* keep ramen aliases so Admin dashboard still compiles */
         ramen: {
-          red: '#D7263D',
-          dark: '#0B0A0A',
+          red: '#E63946',
+          dark: '#0A1628',
           charcoal: '#111113',
-          cream: '#FFF3E0',
-          beige: '#F7E7CE',
-          gold: '#E0A106',
-          sesame: '#D1C7B7',
+          cream: '#F0F8FF',
+          beige: '#A8D8EA',
+          gold: '#F5C518',
+          sesame: '#1E3A5F',
           seaweed: '#1F2937',
-          kimchi: '#B81D24'
+          kimchi: '#C1121F'
         }
       },
       fontFamily: {
-        'pretendard': ['Pretendard', 'system-ui', 'sans-serif'],
-        'noto-kr': ['Noto Serif KR', 'serif']
+        'outfit': ['Outfit', 'system-ui', 'sans-serif'],
+        'inter': ['Inter', 'system-ui', 'sans-serif'],
+        'pretendard': ['Outfit', 'system-ui', 'sans-serif'],
+        'noto-kr': ['Outfit', 'serif'],
+        'noto': ['Outfit', 'serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.4s ease-out',
         'bounce-gentle': 'bounceGentle 0.6s ease-out',
-        'scale-in': 'scaleIn 0.3s ease-out'
+        'scale-in': 'scaleIn 0.3s ease-out',
+        'wave': 'wave 6s ease-in-out infinite',
+        'float': 'float 4s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -43,6 +58,14 @@ export default {
         scaleIn: {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' }
+        },
+        wave: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '50%': { transform: 'translateX(-40px)' }
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' }
         }
       }
     },
