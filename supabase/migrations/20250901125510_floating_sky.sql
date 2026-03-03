@@ -61,7 +61,8 @@ CREATE TRIGGER update_payment_methods_updated_at
 
 -- Insert default payment methods
 INSERT INTO payment_methods (id, name, account_number, account_name, qr_code_url, sort_order, active) VALUES
-  ('gcash', 'GCash', '09XX XXX XXXX', 'M&C Bakehouse', 'https://images.pexels.com/photos/8867482/pexels-photo-8867482.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop', 1, true),
-  ('maya', 'Maya (PayMaya)', '09XX XXX XXXX', 'M&C Bakehouse', 'https://images.pexels.com/photos/8867482/pexels-photo-8867482.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop', 2, true),
-  ('bank-transfer', 'Bank Transfer', 'Account: 1234-5678-9012', 'M&C Bakehouse', 'https://images.pexels.com/photos/8867482/pexels-photo-8867482.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop', 3, true)
+  ('gcash', 'GCash', '09XX XXX XXXX', 'eL Capitan', 'https://images.pexels.com/photos/8867482/pexels-photo-8867482.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop', 1, true),
+  ('maya', 'Maya (PayMaya)', '09XX XXX XXXX', 'eL Capitan', 'https://images.pexels.com/photos/8867482/pexels-photo-8867482.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop', 2, true),
+  ('bank-transfer', 'Bank Transfer', 'Account: 1234-5678-9012', 'eL Capitan', 'https://images.pexels.com/photos/8867482/pexels-photo-8867482.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop', 3, true),
+  ('cash', 'Cash', 'N/A', 'N/A', '', 4, true)
 ON CONFLICT (id) DO NOTHING;
