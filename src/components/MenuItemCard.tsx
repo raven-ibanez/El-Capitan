@@ -17,7 +17,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 }) => {
   const [showCustomization, setShowCustomization] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<Variation | undefined>(
-    item.variations?.[0]
+    item.variations?.find(v => !v.trackInventory || (v.stockQuantity ?? 0) > 0) || item.variations?.[0]
   );
   const [selectedAddOns, setSelectedAddOns] = useState<(AddOn & { quantity: number })[]>([]);
 
@@ -93,9 +93,11 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
   return (
     <>
-      <div className={`bg-captain-blue rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-captain-cyan/10 transition-all duration-300 overflow-hidden group animate-scale-in border border-captain-blue hover:border-captain-cyan/40 ${!item.available ? 'opacity-60' : ''}`}>
-        {/* Image Container with Badges */}
-        <div className="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* ── List Row ── */}
+      <div className={`flex items-center gap-4 bg-captain-blue rounded-2xl px-4 py-3 border border-captain-blue hover:border-captain-cyan/40 hover:shadow-lg hover:shadow-captain-cyan/10 transition-all duration-300 group animate-scale-in ${!item.available ? 'opacity-60' : ''}`}>
+
+        {/* Thumbnail */}
+        <div className="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-captain-navy">
           {item.image ? (
             <img
               src={item.image}
@@ -110,125 +112,98 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             />
           ) : null}
           <div className={`absolute inset-0 flex items-center justify-center ${item.image ? 'hidden' : ''}`}>
-            <div className="text-6xl opacity-30">
+            <span className="text-3xl opacity-50">
               {item.category?.includes('water') ? '💧' : '🧊'}
-            </div>
+            </span>
           </div>
 
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
-            {item.isOnDiscount && item.discountPrice && (
-              <div className="bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-pulse">
-                SALE
-              </div>
-            )}
-            {item.popular && (
-              <div className="bg-gradient-to-r from-captain-gold to-yellow-400 text-captain-navy text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                ⭐ POPULAR
-              </div>
-            )}
-          </div>
-
-          {!item.available && (
-            <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-              UNAVAILABLE
-            </div>
-          )}
-
-          {/* Discount Percentage Badge */}
+          {/* Discount % overlay */}
           {item.isOnDiscount && item.discountPrice && (
-            <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm text-red-600 text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+            <div className="absolute bottom-0 left-0 right-0 bg-red-600/90 text-white text-[10px] font-bold text-center py-0.5">
               {Math.round(((item.basePrice - item.discountPrice) / item.basePrice) * 100)}% OFF
             </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="p-5">
-          <div className="flex items-start justify-between mb-3">
-            <h4 className="text-lg font-semibold text-captain-white leading-tight flex-1 pr-2">{item.name}</h4>
-            {item.variations && item.variations.length > 0 && (
-              <div className="text-xs text-captain-cyan bg-captain-navy px-2 py-1 rounded-full whitespace-nowrap border border-captain-cyan/30">
-                {item.variations.length} sizes
-              </div>
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <h4 className="text-base font-semibold text-captain-white leading-tight truncate">{item.name}</h4>
+            {item.popular && (
+              <span className="text-[10px] font-bold bg-gradient-to-r from-captain-gold to-yellow-400 text-captain-navy px-2 py-0.5 rounded-full whitespace-nowrap">⭐ POPULAR</span>
             )}
+            {item.isOnDiscount && item.discountPrice && (
+              <span className="text-[10px] font-bold bg-red-50 text-red-600 px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap">SALE</span>
+            )}
+            {!item.available ? (
+              <span className="text-[10px] font-bold bg-gray-600 text-white px-2 py-0.5 rounded-full whitespace-nowrap">UNAVAILABLE</span>
+            ) : item.trackInventory && (item.stockQuantity ?? 0) === 0 && (!item.variations || item.variations.length === 0) ? (
+              <span className="text-[10px] font-bold bg-red-600 text-white px-2 py-0.5 rounded-full whitespace-nowrap">OUT OF STOCK</span>
+            ) : item.trackInventory && (item.stockQuantity ?? 0) <= (item.lowStockThreshold || 0) && (!item.variations || item.variations.length === 0) ? (
+              <span className="text-[10px] font-bold bg-yellow-500 text-captain-navy px-2 py-0.5 rounded-full whitespace-nowrap">LOW STOCK</span>
+            ) : item.variations?.every(v => v.trackInventory && (v.stockQuantity ?? 0) === 0) ? (
+              <span className="text-[10px] font-bold bg-red-600 text-white px-2 py-0.5 rounded-full whitespace-nowrap">OUT OF STOCK</span>
+            ) : null}
           </div>
 
-          <p className={`text-sm mb-4 leading-relaxed ${!item.available ? 'text-captain-blue' : 'text-captain-light'}`}>
+          <p className="text-xs text-captain-light/70 leading-snug line-clamp-2 mb-1">
             {!item.available ? 'Currently Unavailable' : item.description}
           </p>
 
-          {/* Pricing Section */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex-1">
-              {item.isOnDiscount && item.discountPrice ? (
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold text-captain-cyan">
-                      ₱{item.discountPrice.toFixed(2)}
-                    </span>
-                    <span className="text-sm text-captain-light/50 line-through">
-                      ₱{item.basePrice.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Save ₱{(item.basePrice - item.discountPrice).toFixed(2)}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-2xl font-bold text-captain-cyan">
-                  ₱{item.basePrice.toFixed(2)}
-                </div>
-              )}
-
-              {item.variations && item.variations.length > 0 && (
-                <div className="text-xs text-captain-light/60 mt-1">
-                  Starting price
-                </div>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex-shrink-0">
-              {!item.available ? (
-                <button
-                  disabled
-                  className="bg-gray-200 text-gray-500 px-4 py-2.5 rounded-xl cursor-not-allowed font-medium text-sm"
-                >
-                  Unavailable
-                </button>
-              ) : quantity === 0 ? (
-                <button
-                  onClick={handleAddToCart}
-                  className="bg-gradient-to-r from-captain-cyan to-cyan-400 text-captain-navy px-6 py-2.5 rounded-xl hover:from-cyan-300 hover:to-captain-cyan transition-all duration-200 transform hover:scale-105 font-bold text-sm shadow-lg shadow-captain-cyan/30"
-                >
-                  {item.variations?.length || item.addOns?.length ? 'Customize' : 'Add to Cart'}
-                </button>
-              ) : (
-                <div className="flex items-center space-x-2 bg-captain-navy rounded-xl p-1 border border-captain-cyan/30">
-                  <button
-                    onClick={handleDecrement}
-                    className="p-2 hover:bg-captain-blue rounded-lg transition-colors duration-200 hover:scale-110"
-                  >
-                    <Minus className="h-4 w-4 text-captain-cyan" />
-                  </button>
-                  <span className="font-bold text-captain-white min-w-[28px] text-center text-sm">{quantity}</span>
-                  <button
-                    onClick={handleIncrement}
-                    className="p-2 hover:bg-captain-blue rounded-lg transition-colors duration-200 hover:scale-110"
-                  >
-                    <Plus className="h-4 w-4 text-captain-cyan" />
-                  </button>
-                </div>
-              )}
-            </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {item.variations && item.variations.length > 0 && (
+              <span className="text-[10px] text-captain-cyan border border-captain-cyan/30 px-2 py-0.5 rounded-full">{item.variations.length} sizes</span>
+            )}
+            {item.addOns && item.addOns.length > 0 && (
+              <span className="text-[10px] text-captain-cyan border border-captain-cyan/20 px-2 py-0.5 rounded-full">+{item.addOns.length} add-on{item.addOns.length > 1 ? 's' : ''}</span>
+            )}
           </div>
+        </div>
 
-          {/* Add-ons indicator */}
-          {item.addOns && item.addOns.length > 0 && (
-            <div className="flex items-center space-x-1 text-xs text-captain-cyan bg-captain-navy px-2 py-1 rounded-lg border border-captain-cyan/20">
-              <span>+</span>
-              <span>{item.addOns.length} add-on{item.addOns.length > 1 ? 's' : ''} available</span>
+        {/* Price + Action */}
+        <div className="flex-shrink-0 flex flex-col items-end gap-2">
+          {/* Price */}
+          {item.isOnDiscount && item.discountPrice ? (
+            <div className="text-right">
+              <div className="text-lg font-bold text-captain-cyan leading-none">₱{item.discountPrice.toFixed(2)}</div>
+              <div className="text-xs text-captain-light/40 line-through">₱{item.basePrice.toFixed(2)}</div>
+            </div>
+          ) : (
+            <div className="text-lg font-bold text-captain-cyan">₱{item.basePrice.toFixed(2)}</div>
+          )}
+          {item.variations && item.variations.length > 0 && (
+            <div className="text-[10px] text-captain-light/50 -mt-1">starting price</div>
+          )}
+
+          {/* Action */}
+          {!item.available ? (
+            <button disabled className="bg-gray-700 text-gray-400 px-3 py-1.5 rounded-xl cursor-not-allowed font-medium text-xs">
+              Unavailable
+            </button>
+          ) : (item.trackInventory && (item.stockQuantity ?? 0) === 0 && (!item.variations || item.variations.length === 0)) || (item.variations?.length && item.variations.every(v => v.trackInventory && (v.stockQuantity ?? 0) === 0)) ? (
+            <button disabled className="bg-red-900/50 text-red-300 border border-red-500/30 px-3 py-1.5 rounded-xl cursor-not-allowed font-medium text-xs">
+              Sold Out
+            </button>
+          ) : quantity === 0 ? (
+            <button
+              onClick={handleAddToCart}
+              className="bg-gradient-to-r from-captain-cyan to-cyan-400 text-captain-navy px-4 py-1.5 rounded-xl hover:from-cyan-300 hover:to-captain-cyan transition-all duration-200 hover:scale-105 font-bold text-xs shadow-lg shadow-captain-cyan/30"
+            >
+              {item.variations?.length || item.addOns?.length ? 'Customize' : '+ Add'}
+            </button>
+          ) : (
+            <div className="flex items-center space-x-1 bg-captain-navy rounded-xl p-1 border border-captain-cyan/30">
+              <button onClick={handleDecrement} className="p-1.5 hover:bg-captain-blue rounded-lg transition-colors duration-200">
+                <Minus className="h-3.5 w-3.5 text-captain-cyan" />
+              </button>
+              <span className="font-bold text-captain-white min-w-[22px] text-center text-sm">{quantity}</span>
+              <button
+                onClick={handleIncrement}
+                disabled={item.trackInventory && (item.stockQuantity ?? 0) <= quantity}
+                className={`p-1.5 hover:bg-captain-blue rounded-lg transition-colors duration-200 ${item.trackInventory && (item.stockQuantity ?? 0) <= quantity ? 'opacity-30 cursor-not-allowed' : ''}`}
+              >
+                <Plus className="h-3.5 w-3.5 text-captain-cyan" />
+              </button>
             </div>
           )}
         </div>
@@ -257,29 +232,43 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                 <div className="mb-6">
                   <h4 className="font-semibold text-captain-white mb-4">Choose Size</h4>
                   <div className="space-y-3">
-                    {item.variations.map((variation) => (
-                      <label
-                        key={variation.id}
-                        className={`flex items-center justify-between p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${selectedVariation?.id === variation.id
-                            ? 'border-captain-cyan bg-captain-cyan/10'
-                            : 'border-captain-navy hover:border-captain-cyan/50 hover:bg-captain-navy/50'
-                          }`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <input
-                            type="radio"
-                            name="variation"
-                            checked={selectedVariation?.id === variation.id}
-                            onChange={() => setSelectedVariation(variation)}
-                            className="text-red-600 focus:ring-red-500"
-                          />
-                          <span className="font-medium text-captain-white">{variation.name}</span>
-                        </div>
-                        <span className="text-captain-cyan font-semibold">
-                          ₱{((item.effectivePrice || item.basePrice) + variation.price).toFixed(2)}
-                        </span>
-                      </label>
-                    ))}
+                    {item.variations.map((variation) => {
+                      const isVarOutOfStock = variation.trackInventory && (variation.stockQuantity ?? 0) === 0;
+                      return (
+                        <label
+                          key={variation.id}
+                          className={`flex items-center justify-between p-4 border-2 rounded-xl transition-all duration-200 ${isVarOutOfStock
+                            ? 'opacity-50 cursor-not-allowed border-gray-800'
+                            : selectedVariation?.id === variation.id
+                              ? 'border-captain-cyan bg-captain-cyan/10 cursor-pointer'
+                              : 'border-captain-navy hover:border-captain-cyan/50 hover:bg-captain-navy/50 cursor-pointer'
+                            }`}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <input
+                              type="radio"
+                              name="variation"
+                              disabled={isVarOutOfStock}
+                              checked={selectedVariation?.id === variation.id}
+                              onChange={() => !isVarOutOfStock && setSelectedVariation(variation)}
+                              className="text-red-600 focus:ring-red-500"
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-medium text-captain-white">{variation.name}</span>
+                              {isVarOutOfStock && (
+                                <span className="text-[10px] font-bold text-red-500 uppercase">Out of Stock</span>
+                              )}
+                              {variation.trackInventory && !isVarOutOfStock && (variation.stockQuantity ?? 0) <= (variation.lowStockThreshold || 0) && (
+                                <span className="text-[10px] font-bold text-yellow-500 uppercase">Low Stock ({variation.stockQuantity} left)</span>
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-captain-cyan font-semibold">
+                            ₱{((item.effectivePrice || item.basePrice) + variation.price).toFixed(2)}
+                          </span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}

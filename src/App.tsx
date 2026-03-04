@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useCart } from './hooks/useCart';
 import Header from './components/Header';
 import SubNav from './components/SubNav';
+import Hero from './components/Hero';
 import Menu from './components/Menu';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
@@ -37,6 +38,8 @@ function MainApp() {
         onMenuClick={() => handleViewChange('menu')}
       />
       <SubNav selectedCategory={selectedCategory} onCategoryClick={handleCategoryClick} />
+
+      {currentView === 'menu' && <Hero />}
 
       {currentView === 'menu' && (
         <Menu

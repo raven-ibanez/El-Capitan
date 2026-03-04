@@ -49,7 +49,6 @@ const Cart: React.FC<CartProps> = ({
           <ArrowLeft className="h-5 w-5" />
           <span>Continue Shopping</span>
         </button>
-        <h1 className="text-3xl font-playfair font-semibold text-black">Your Cart</h1>
         <h1 className="text-3xl font-noto font-semibold text-black">Your Cart</h1>
         <button
           onClick={clearCart}
@@ -70,8 +69,8 @@ const Cart: React.FC<CartProps> = ({
                 )}
                 {item.selectedAddOns && item.selectedAddOns.length > 0 && (
                   <p className="text-sm text-gray-500 mb-1">
-                    Add-ons: {item.selectedAddOns.map(addOn => 
-                      addOn.quantity && addOn.quantity > 1 
+                    Add-ons: {item.selectedAddOns.map(addOn =>
+                      addOn.quantity && addOn.quantity > 1
                         ? `${addOn.name} x${addOn.quantity}`
                         : addOn.name
                     ).join(', ')}
@@ -79,7 +78,7 @@ const Cart: React.FC<CartProps> = ({
                 )}
                 <p className="text-lg font-semibold text-black">₱{item.totalPrice} each</p>
               </div>
-              
+
               <div className="flex items-center space-x-4 ml-4">
                 <div className="flex items-center space-x-3 bg-yellow-100 rounded-full p-1">
                   <button
@@ -91,16 +90,22 @@ const Cart: React.FC<CartProps> = ({
                   <span className="font-semibold text-black min-w-[32px] text-center">{item.quantity}</span>
                   <button
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="p-2 hover:bg-yellow-200 rounded-full transition-colors duration-200"
+                    disabled={item.selectedVariation?.trackInventory
+                      ? (item.selectedVariation.stockQuantity ?? 0) <= item.quantity
+                      : (item.trackInventory ? (item.stockQuantity ?? 0) <= item.quantity : false)
+                    }
+                    className={`p-2 hover:bg-yellow-200 rounded-full transition-colors duration-200 ${(item.selectedVariation?.trackInventory
+                      ? (item.selectedVariation.stockQuantity ?? 0) <= item.quantity
+                      : (item.trackInventory ? (item.stockQuantity ?? 0) <= item.quantity : false)) ? 'opacity-30 cursor-not-allowed' : ''}`}
                   >
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
-                
+
                 <div className="text-right">
                   <p className="text-lg font-semibold text-black">₱{item.totalPrice * item.quantity}</p>
                 </div>
-                
+
                 <button
                   onClick={() => removeFromCart(item.id)}
                   className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-200"
@@ -116,9 +121,9 @@ const Cart: React.FC<CartProps> = ({
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between text-2xl font-noto font-semibold text-black mb-6">
           <span>Total:</span>
-          <span>₱{parseFloat(getTotalPrice() || 0).toFixed(2)}</span>
+          <span>₱{getTotalPrice().toFixed(2)}</span>
         </div>
-        
+
         <button
           onClick={onCheckout}
           className="w-full bg-red-600 text-white py-4 rounded-xl hover:bg-red-700 transition-all duration-200 transform hover:scale-[1.02] font-medium text-lg"

@@ -2,6 +2,9 @@ export interface Variation {
   id: string;
   name: string;
   price: number;
+  trackInventory?: boolean;
+  stockQuantity?: number;
+  lowStockThreshold?: number;
 }
 
 export interface AddOn {
@@ -31,6 +34,10 @@ export interface MenuItem {
   // Computed effective price (calculated in the app)
   effectivePrice?: number;
   isOnDiscount?: boolean;
+  // Inventory fields
+  trackInventory?: boolean;
+  stockQuantity?: number;
+  lowStockThreshold?: number;
 }
 
 export interface CartItem extends MenuItem {
@@ -71,4 +78,15 @@ export interface SiteSettings {
   site_description: string;
   currency: string;
   currency_code: string;
+}
+
+export interface InventoryLog {
+  id: string;
+  menu_item_id: string;
+  variation_id?: string;
+  change_amount: number;
+  reason: string;
+  created_at: string;
+  menu_item_name?: string;
+  variation_name?: string;
 }

@@ -20,7 +20,7 @@ export const useCart = () => {
 
   const addToCart = useCallback((item: MenuItem, quantity: number = 1, variation?: Variation, addOns?: AddOn[]) => {
     const totalPrice = calculateItemPrice(item, variation, addOns);
-    
+
     // Group add-ons by name and sum their quantities
     const groupedAddOns = addOns?.reduce((groups, addOn) => {
       const existing = groups.find(g => g.id === addOn.id);
@@ -31,23 +31,44 @@ export const useCart = () => {
       }
       return groups;
     }, [] as (AddOn & { quantity: number })[]);
-    
+
     setCartItems(prev => {
-      const existingItem = prev.find(cartItem => 
-        cartItem.id === item.id && 
-        cartItem.selectedVariation?.id === variation?.id &&
-        JSON.stringify(cartItem.selectedAddOns?.map(a => `${a.id}-${a.quantity || 1}`).sort()) === JSON.stringify(groupedAddOns?.map(a => `${a.id}-${a.quantity}`).sort())
-      );
-      
-      if (existingItem) {
-        return prev.map(cartItem =>
-          cartItem === existingItem
-            ? { ...cartItem, quantity: cartItem.quantity + quantity }
+      // Create a unique ID for this item including its customization
+      const uniqueId = `${item.id}-${variation?.id || 'default'}-${addOns?.map(a => a.id).sort().join(',') || 'none'}`;
+
+      const existingIndex = prev.findIndex(cartItem => cartItem.id === uniqueId);
+
+      if (existingIndex >= 0) {
+        const existingItem = prev[existingIndex];
+        const newQuantity = existingItem.quantity + quantity;
+
+        // Enforce stock limit
+        const stockLimit = variation?.trackInventory
+          ? variation.stockQuantity ?? Infinity
+          : (item.trackInventory ? item.stockQuantity ?? Infinity : Infinity);
+
+        if (newQuantity > stockLimit) {
+          alert(`Insufficient stock. Only ${stockLimit} available.`);
+          return prev;
+        }
+
+        return prev.map((cartItem, idx) =>
+          idx === existingIndex
+            ? { ...cartItem, quantity: newQuantity }
             : cartItem
         );
       } else {
-        const uniqueId = `${item.id}-${variation?.id || 'default'}-${addOns?.map(a => a.id).join(',') || 'none'}`;
-        return [...prev, { 
+        // Enforce stock limit for new item
+        const stockLimit = variation?.trackInventory
+          ? variation.stockQuantity ?? Infinity
+          : (item.trackInventory ? item.stockQuantity ?? Infinity : Infinity);
+
+        if (quantity > stockLimit) {
+          alert(`Insufficient stock. Only ${stockLimit} available.`);
+          return prev;
+        }
+
+        return [...prev, {
           ...item,
           id: uniqueId,
           quantity,
@@ -64,11 +85,22 @@ export const useCart = () => {
       removeFromCart(id);
       return;
     }
-    
+
     setCartItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      )
+      prev.map(item => {
+        if (item.id === id) {
+          // Enforce stock limit
+          const stockLimit = item.selectedVariation?.trackInventory
+            ? item.selectedVariation.stockQuantity ?? Infinity
+            : (item.trackInventory ? item.stockQuantity ?? Infinity : Infinity);
+
+          if (quantity > stockLimit) {
+            return item; // Don't update if exceeds stock
+          }
+          return { ...item, quantity };
+        }
+        return item;
+      })
     );
   }, []);
 

@@ -86,49 +86,62 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
 
   return (
     <>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-outfit font-bold text-captain-white mb-3">Our Products</h2>
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <div className="h-px flex-1 max-w-16 bg-captain-cyan/40" />
-            <span className="text-captain-cyan text-sm font-medium tracking-widest uppercase">Purified • Fresh • Pure</span>
-            <div className="h-px flex-1 max-w-16 bg-captain-cyan/40" />
+      <div
+        className="relative"
+        style={{
+          backgroundImage: "url('/ice-bg.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+        }}
+      >
+        {/* Dark overlay so text stays readable */}
+        <div className="absolute inset-0 bg-captain-navy/80 backdrop-blur-[2px]" />
+
+        <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-outfit font-bold text-captain-white mb-3">Our Products</h2>
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="h-px flex-1 max-w-16 bg-captain-cyan/40" />
+              <span className="text-captain-cyan text-sm font-medium tracking-widest uppercase">Clean • Safe • High Quality</span>
+              <div className="h-px flex-1 max-w-16 bg-captain-cyan/40" />
+            </div>
+            <p className="text-captain-light max-w-2xl mx-auto">
+              Premium purified tube ice and clean drinking water, sourced and delivered with care.
+            </p>
           </div>
-          <p className="text-captain-light max-w-2xl mx-auto">
-            Premium purified tube ice and clean drinking water, sourced and delivered with care.
-          </p>
-        </div>
 
-        {categories.map((category) => {
-          const categoryItems = menuItems.filter(item => item.category === category.id);
+          {categories.map((category) => {
+            const categoryItems = menuItems.filter(item => item.category === category.id);
 
-          if (categoryItems.length === 0) return null;
+            if (categoryItems.length === 0) return null;
 
-          return (
-            <section key={category.id} id={category.id} className="mb-16">
-              <div className="flex items-center mb-8 pb-3 border-b border-captain-cyan/30">
-                <span className="text-3xl mr-3">{category.icon}</span>
-                <h3 className="text-3xl font-outfit font-bold text-captain-white">{category.name}</h3>
-              </div>
+            return (
+              <section key={category.id} id={category.id} className="mb-16">
+                <div className="flex items-center mb-8 pb-3 border-b border-captain-cyan/30">
+                  <span className="text-3xl mr-3">{category.icon}</span>
+                  <h3 className="text-3xl font-outfit font-bold text-captain-white">{category.name}</h3>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categoryItems.map((item) => {
-                  const cartItem = cartItems.find(cartItem => cartItem.id === item.id);
-                  return (
-                    <MenuItemCard
-                      key={item.id}
-                      item={item}
-                      onAddToCart={addToCart}
-                      quantity={cartItem?.quantity || 0}
-                      onUpdateQuantity={updateQuantity}
-                    />
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })}
-      </main>
+                <div className="flex flex-col gap-3">
+                  {categoryItems.map((item) => {
+                    const cartItem = cartItems.find(cartItem => cartItem.id === item.id);
+                    return (
+                      <MenuItemCard
+                        key={item.id}
+                        item={item}
+                        onAddToCart={addToCart}
+                        quantity={cartItem?.quantity || 0}
+                        onUpdateQuantity={updateQuantity}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+        </main>
+      </div>
     </>
   );
 };

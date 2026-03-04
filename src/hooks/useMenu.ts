@@ -10,7 +10,7 @@ export const useMenu = () => {
   const fetchMenuItems = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch menu items with their variations and add-ons
       const { data: items, error: itemsError } = await supabase
         .from('menu_items')
@@ -28,11 +28,11 @@ export const useMenu = () => {
         const now = new Date();
         const discountStart = item.discount_start_date ? new Date(item.discount_start_date) : null;
         const discountEnd = item.discount_end_date ? new Date(item.discount_end_date) : null;
-        
-        const isDiscountActive = item.discount_active && 
-          (!discountStart || now >= discountStart) && 
+
+        const isDiscountActive = item.discount_active &&
+          (!discountStart || now >= discountStart) &&
           (!discountEnd || now <= discountEnd);
-        
+
         // Calculate effective price
         const effectivePrice = isDiscountActive && item.discount_price ? item.discount_price : item.base_price;
 
@@ -51,12 +51,18 @@ export const useMenu = () => {
           discountActive: item.discount_active || false,
           effectivePrice,
           isOnDiscount: isDiscountActive,
-          variations: item.variations?.map(v => ({
+          trackInventory: item.track_inventory || false,
+          stockQuantity: item.stock_quantity || 0,
+          lowStockThreshold: item.low_stock_threshold || 0,
+          variations: item.variations?.map((v: any) => ({
             id: v.id,
             name: v.name,
-            price: v.price
+            price: v.price,
+            trackInventory: v.track_inventory || false,
+            stockQuantity: v.stock_quantity || 0,
+            lowStockThreshold: v.low_stock_threshold || 0
           })) || [],
-          addOns: item.add_ons?.map(a => ({
+          addOns: item.add_ons?.map((a: any) => ({
             id: a.id,
             name: a.name,
             price: a.price,
@@ -91,7 +97,10 @@ export const useMenu = () => {
           discount_price: item.discountPrice || null,
           discount_start_date: item.discountStartDate || null,
           discount_end_date: item.discountEndDate || null,
-          discount_active: item.discountActive || false
+          discount_active: item.discountActive || false,
+          track_inventory: item.trackInventory || false,
+          stock_quantity: item.stockQuantity || 0,
+          low_stock_threshold: item.lowStockThreshold || 0
         })
         .select()
         .single();
@@ -106,7 +115,10 @@ export const useMenu = () => {
             item.variations.map(v => ({
               menu_item_id: menuItem.id,
               name: v.name,
-              price: v.price
+              price: v.price,
+              track_inventory: v.trackInventory || false,
+              stock_quantity: v.stockQuantity || 0,
+              low_stock_threshold: v.lowStockThreshold || 0
             }))
           );
 
@@ -153,7 +165,10 @@ export const useMenu = () => {
           discount_price: updates.discountPrice || null,
           discount_start_date: updates.discountStartDate || null,
           discount_end_date: updates.discountEndDate || null,
-          discount_active: updates.discountActive
+          discount_active: updates.discountActive,
+          track_inventory: updates.trackInventory,
+          stock_quantity: updates.stockQuantity,
+          low_stock_threshold: updates.lowStockThreshold
         })
         .eq('id', id);
 
@@ -171,7 +186,10 @@ export const useMenu = () => {
             updates.variations.map(v => ({
               menu_item_id: id,
               name: v.name,
-              price: v.price
+              price: v.price,
+              track_inventory: v.trackInventory || false,
+              stock_quantity: v.stockQuantity || 0,
+              low_stock_threshold: v.lowStockThreshold || 0
             }))
           );
 
@@ -228,6 +246,21 @@ export const useMenu = () => {
     addMenuItem,
     updateMenuItem,
     deleteMenuItem,
+    updateStock: async (menuItemId: string, variationId: string | null, amount: number, reason: string) => {
+      try {
+        const { error } = await supabase.rpc('update_item_stock', {
+          p_menu_item_id: menuItemId,
+          p_variation_id: variationId,
+          p_change_amount: amount,
+          p_reason: reason
+        });
+        if (error) throw error;
+        await fetchMenuItems();
+      } catch (err) {
+        console.error('Error updating stock:', err);
+        throw err;
+      }
+    },
     refetch: fetchMenuItems
   };
 };

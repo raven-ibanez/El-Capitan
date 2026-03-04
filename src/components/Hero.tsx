@@ -2,7 +2,16 @@ import React from 'react';
 
 const Hero: React.FC = () => {
   return (
-    <section className="relative wave-bg bg-gradient-to-br from-captain-navy via-captain-blue to-captain-navy py-20 px-4 overflow-hidden">
+    <section
+      className="relative wave-bg py-20 px-4 overflow-hidden"
+      style={{
+        backgroundImage: "url('/hero-bg.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+      }}
+    >
+      {/* Deeper dark overlay for maximum readability */}
+      <div className="absolute inset-0 bg-black/70" />
       {/* Decorative nautical circles */}
       <div className="absolute top-8 left-8 w-32 h-32 rounded-full border border-captain-cyan/20 animate-float" />
       <div className="absolute top-12 left-12 w-20 h-20 rounded-full border border-captain-gold/20 animate-float" style={{ animationDelay: '-2s' }} />
@@ -20,10 +29,10 @@ const Hero: React.FC = () => {
           <span className="animate-float" style={{ animationDelay: '-2s' }}>🧊</span>
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-outfit font-bold text-captain-white mb-4 animate-fade-in leading-tight">
-          Fresh.{' '}
-          <span className="text-captain-cyan drop-shadow-lg">Pure.</span>{' '}
-          Delivered.
+        <h1 className="text-5xl md:text-7xl font-outfit font-bold text-white mb-4 animate-fade-in leading-tight [text-shadow:_0_4px_12px_rgba(0,0,0,1)]">
+          Clean.{' '}
+          <span className="text-captain-cyan [text-shadow:_0_4px_12px_rgba(0,0,0,1)]">Safe.</span>{' '}
+          High Quality.
         </h1>
 
         <div className="flex items-center justify-center gap-3 mb-5">
@@ -34,7 +43,7 @@ const Hero: React.FC = () => {
           <div className="h-px flex-1 max-w-20 bg-gradient-to-l from-transparent to-captain-cyan" />
         </div>
 
-        <p className="text-lg text-captain-light mb-10 max-w-2xl mx-auto animate-slide-up leading-relaxed">
+        <p className="text-lg text-white mb-10 max-w-2xl mx-auto animate-slide-up leading-relaxed [text-shadow:_0_2px_8px_rgba(0,0,0,1)] font-medium">
           Premium purified tube ice &amp; clean drinking water — straight from the source to your doorstep.
           Order now and beat the heat! 💧
         </p>

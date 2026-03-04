@@ -1,13 +1,30 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Save, X, ArrowLeft, Coffee, TrendingUp, Package, Users, Lock, FolderOpen, CreditCard, Settings } from 'lucide-react';
+import {
+  Plus,
+  Trash2,
+  X,
+  Edit,
+  Save,
+  Package,
+  TrendingUp,
+  Coffee,
+  AlertTriangle,
+  ArrowLeft,
+  ArrowUpRight,
+  Settings,
+  FolderOpen,
+  CreditCard,
+  Lock
+} from 'lucide-react';
 import { MenuItem, Variation, AddOn } from '../types';
 import { addOnCategories } from '../data/menuData';
 import { useMenu } from '../hooks/useMenu';
-import { useCategories, Category } from '../hooks/useCategories';
+import { useCategories } from '../hooks/useCategories';
 import ImageUpload from './ImageUpload';
 import CategoryManager from './CategoryManager';
 import PaymentMethodManager from './PaymentMethodManager';
 import SiteSettingsManager from './SiteSettingsManager';
+import InventoryManager from './InventoryManager';
 
 const AdminDashboard: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -17,7 +34,7 @@ const AdminDashboard: React.FC = () => {
   const [loginError, setLoginError] = useState('');
   const { menuItems, loading, addMenuItem, updateMenuItem, deleteMenuItem } = useMenu();
   const { categories } = useCategories();
-  const [currentView, setCurrentView] = useState<'dashboard' | 'items' | 'add' | 'edit' | 'categories' | 'payments' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'items' | 'add' | 'edit' | 'categories' | 'payments' | 'settings' | 'inventory'>('dashboard');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -186,7 +203,7 @@ const AdminDashboard: React.FC = () => {
     });
   };
 
-  const updateVariation = (index: number, field: keyof Variation, value: string | number) => {
+  const updateVariation = (index: number, field: keyof Variation, value: string | number | boolean) => {
     const updatedVariations = [...(formData.variations || [])];
     updatedVariations[index] = { ...updatedVariations[index], [field]: value };
     setFormData({ ...formData, variations: updatedVariations });
@@ -229,6 +246,12 @@ const AdminDashboard: React.FC = () => {
     ...cat,
     count: menuItems.filter(item => item.category === cat.id).length
   }));
+
+  const lowStockItems = menuItems.filter(item => {
+    const isMainLow = item.trackInventory && (item.stockQuantity ?? 0) <= (item.lowStockThreshold || 0);
+    const hasLowVariation = item.variations?.some(v => v.trackInventory && (v.stockQuantity ?? 0) <= (v.lowStockThreshold || 0));
+    return isMainLow || hasLowVariation;
+  });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -400,6 +423,43 @@ const AdminDashboard: React.FC = () => {
                   <span className="text-sm font-medium text-black">Available for Order</span>
                 </label>
               </div>
+
+              <div className="flex items-center">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.trackInventory || false}
+                    onChange={(e) => setFormData({ ...formData, trackInventory: e.target.checked })}
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  />
+                  <span className="text-sm font-medium text-black">Track Inventory</span>
+                </label>
+              </div>
+
+              {formData.trackInventory && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Stock Quantity</label>
+                    <input
+                      type="number"
+                      value={formData.stockQuantity || 0}
+                      onChange={(e) => setFormData({ ...formData, stockQuantity: Number(e.target.value) })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Low Stock Threshold</label>
+                    <input
+                      type="number"
+                      value={formData.lowStockThreshold || 5}
+                      onChange={(e) => setFormData({ ...formData, lowStockThreshold: Number(e.target.value) })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                      placeholder="5"
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Discount Pricing Section */}
@@ -501,6 +561,35 @@ const AdminDashboard: React.FC = () => {
                     className="w-24 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Price"
                   />
+                  <div className="flex flex-col space-y-2">
+                    <label className="flex items-center space-x-2 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={variation.trackInventory || false}
+                        onChange={(e) => updateVariation(index, 'trackInventory', e.target.checked)}
+                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                      />
+                      <span className="text-xs font-medium text-black">Track</span>
+                    </label>
+                    {variation.trackInventory && (
+                      <div className="flex space-x-2">
+                        <input
+                          type="number"
+                          value={variation.stockQuantity || 0}
+                          onChange={(e) => updateVariation(index, 'stockQuantity', Number(e.target.value))}
+                          className="w-16 px-1 py-1 text-xs border border-gray-300 rounded"
+                          placeholder="Stock"
+                        />
+                        <input
+                          type="number"
+                          value={variation.lowStockThreshold || 5}
+                          onChange={(e) => updateVariation(index, 'lowStockThreshold', Number(e.target.value))}
+                          className="w-16 px-1 py-1 text-xs border border-gray-300 rounded"
+                          placeholder="Min"
+                        />
+                      </div>
+                    )}
+                  </div>
                   <button
                     onClick={() => removeVariation(index)}
                     className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors duration-200"
@@ -559,8 +648,8 @@ const AdminDashboard: React.FC = () => {
               ))}
             </div>
           </div>
-        </div>
-      </div>
+        </div >
+      </div >
     );
   }
 
@@ -702,18 +791,18 @@ const AdminDashboard: React.FC = () => {
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-100/80">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-950 uppercase tracking-tight">
                       Select
                     </th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Name</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Category</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Price</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Variations</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Add-ons</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Status</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Actions</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-950 uppercase tracking-tight">Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-950 uppercase tracking-tight">Category</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-950 uppercase tracking-tight">Price</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-950 uppercase tracking-tight">Variations</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-950 uppercase tracking-tight">Add-ons</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-950 uppercase tracking-tight">Status</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-950 uppercase tracking-tight">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -729,29 +818,29 @@ const AdminDashboard: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div>
-                          <div className="font-medium text-gray-900">{item.name}</div>
-                          <div className="text-sm text-gray-500 truncate max-w-xs">{item.description}</div>
+                          <div className="font-bold text-gray-950">{item.name}</div>
+                          <div className="text-sm text-gray-700 font-medium truncate max-w-xs">{item.description}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm font-bold text-gray-800">
                         {categories.find(cat => cat.id === item.category)?.name}
                       </td>
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
                         <div className="flex flex-col">
                           {item.isOnDiscount && item.discountPrice ? (
                             <>
-                              <span className="text-red-600 font-semibold">₱{item.discountPrice}</span>
-                              <span className="text-gray-500 line-through text-xs">₱{item.basePrice}</span>
+                              <span className="text-red-700 font-bold">₱{item.discountPrice}</span>
+                              <span className="text-gray-600 line-through text-xs font-bold">₱{item.basePrice}</span>
                             </>
                           ) : (
-                            <span>₱{item.basePrice}</span>
+                            <span className="font-bold text-gray-950">₱{item.basePrice}</span>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm font-bold text-gray-800">
                         {item.variations?.length || 0} variations
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm font-bold text-gray-800">
                         {item.addOns?.length || 0} add-ons
                       </td>
                       <td className="px-6 py-4">
@@ -896,6 +985,34 @@ const AdminDashboard: React.FC = () => {
     return <PaymentMethodManager onBack={() => setCurrentView('dashboard')} />;
   }
 
+  // Inventory View
+  if (currentView === 'inventory') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setCurrentView('dashboard')}
+                  className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors duration-200"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                  <span>Dashboard</span>
+                </button>
+                <h1 className="text-2xl font-playfair font-semibold text-black">Inventory</h1>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <InventoryManager />
+        </div>
+      </div>
+    );
+  }
+
   // Site Settings View
   if (currentView === 'settings') {
     return (
@@ -937,13 +1054,13 @@ const AdminDashboard: React.FC = () => {
             <div className="flex items-center space-x-4">
               <a
                 href="/"
-                className="text-gray-600 hover:text-black transition-colors duration-200"
+                className="text-gray-800 hover:text-black transition-colors duration-200"
               >
                 View Website
               </a>
               <button
                 onClick={handleLogout}
-                className="text-gray-600 hover:text-black transition-colors duration-200"
+                className="text-gray-800 hover:text-black transition-colors duration-200"
               >
                 Logout
               </button>
@@ -961,8 +1078,8 @@ const AdminDashboard: React.FC = () => {
                 <Package className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Items</p>
-                <p className="text-2xl font-semibold text-gray-900">{totalItems}</p>
+                <p className="text-sm font-semibold text-gray-700">Total Items</p>
+                <p className="text-2xl font-bold text-gray-900">{totalItems}</p>
               </div>
             </div>
           </div>
@@ -973,8 +1090,8 @@ const AdminDashboard: React.FC = () => {
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Available Items</p>
-                <p className="text-2xl font-semibold text-gray-900">{availableItems}</p>
+                <p className="text-sm font-semibold text-gray-700">Available Items</p>
+                <p className="text-2xl font-bold text-gray-900">{availableItems}</p>
               </div>
             </div>
           </div>
@@ -985,20 +1102,20 @@ const AdminDashboard: React.FC = () => {
                 <Coffee className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Popular Items</p>
-                <p className="text-2xl font-semibold text-gray-900">{popularItems}</p>
+                <p className="text-sm font-semibold text-gray-700">Popular Items</p>
+                <p className="text-2xl font-bold text-gray-900">{popularItems}</p>
               </div>
             </div>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-green-500 rounded-lg">
-                <Users className="h-6 w-6 text-white" />
+              <div className="p-2 bg-red-100 rounded-lg">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active</p>
-                <p className="text-2xl font-semibold text-gray-900">Online</p>
+                <p className="text-sm font-semibold text-gray-700">Low Stock Alerts</p>
+                <p className="text-2xl font-bold text-gray-900">{lowStockItems.length}</p>
               </div>
             </div>
           </div>
@@ -1013,36 +1130,43 @@ const AdminDashboard: React.FC = () => {
                 onClick={handleAddItem}
                 className="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors duration-200"
               >
-                <Plus className="h-5 w-5 text-gray-400" />
-                <span className="font-medium text-gray-900">Add New Menu Item</span>
+                <Plus className="h-5 w-5 text-gray-600" />
+                <span className="font-semibold text-gray-900">Add New Menu Item</span>
               </button>
               <button
                 onClick={() => setCurrentView('items')}
                 className="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors duration-200"
               >
-                <Package className="h-5 w-5 text-gray-400" />
-                <span className="font-medium text-gray-900">Manage Menu Items</span>
+                <Package className="h-5 w-5 text-gray-600" />
+                <span className="font-semibold text-gray-900">Manage Menu Items</span>
               </button>
               <button
                 onClick={() => setCurrentView('categories')}
                 className="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors duration-200"
               >
-                <FolderOpen className="h-5 w-5 text-gray-400" />
-                <span className="font-medium text-gray-900">Manage Categories</span>
+                <FolderOpen className="h-5 w-5 text-gray-600" />
+                <span className="font-semibold text-gray-900">Manage Categories</span>
               </button>
               <button
                 onClick={() => setCurrentView('payments')}
                 className="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors duration-200"
               >
-                <CreditCard className="h-5 w-5 text-gray-400" />
-                <span className="font-medium text-gray-900">Payment Methods</span>
+                <CreditCard className="h-5 w-5 text-gray-600" />
+                <span className="font-semibold text-gray-900">Payment Methods</span>
+              </button>
+              <button
+                onClick={() => setCurrentView('inventory')}
+                className="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors duration-200"
+              >
+                <Package className="h-5 w-5 text-gray-600" />
+                <span className="font-semibold text-gray-900">Inventory Management</span>
               </button>
               <button
                 onClick={() => setCurrentView('settings')}
                 className="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors duration-200"
               >
-                <Settings className="h-5 w-5 text-gray-400" />
-                <span className="font-medium text-gray-900">Site Settings</span>
+                <Settings className="h-5 w-5 text-gray-600" />
+                <span className="font-semibold text-gray-900">Site Settings</span>
               </button>
             </div>
           </div>
@@ -1054,14 +1178,57 @@ const AdminDashboard: React.FC = () => {
                 <div key={category.id} className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{category.icon}</span>
-                    <span className="font-medium text-gray-900">{category.name}</span>
+                    <span className="font-bold text-gray-900">{category.name}</span>
                   </div>
-                  <span className="text-sm text-gray-500">{category.count} items</span>
+                  <span className="text-sm font-medium text-gray-700">{category.count} items</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
+
+        {/* Low Stock Detailed Card */}
+        {lowStockItems.length > 0 && (
+          <div className="mt-8 bg-white rounded-xl shadow-sm border border-red-100 overflow-hidden">
+            <div className="bg-red-50 px-6 py-4 border-b border-red-100 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <h3 className="font-semibold text-red-900">Urgent: Low Stock Items</h3>
+              </div>
+              <button
+                onClick={() => setCurrentView('inventory')}
+                className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+              >
+                Manage Inventory →
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {lowStockItems.slice(0, 6).map(item => (
+                  <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
+                      <p className="text-xs text-red-500 font-bold">
+                        {item.trackInventory ? `${item.stockQuantity} left` : 'Variation(s) low'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setCurrentView('inventory')}
+                      className="p-1.5 text-gray-400 hover:text-black transition-colors"
+                    >
+                      <ArrowUpRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {lowStockItems.length > 6 && (
+                <p className="mt-4 text-sm text-center text-gray-500 italic">
+                  And {lowStockItems.length - 6} more items...
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
