@@ -7,7 +7,7 @@ interface CategoryManagerProps {
 }
 
 const CategoryManager: React.FC<CategoryManagerProps> = ({ onBack }) => {
-  const { categories, addCategory, updateCategory, deleteCategory, reorderCategories } = useCategories();
+  const { categories, addCategory, updateCategory, deleteCategory, reorderCategories } = useCategories(true);
   const [currentView, setCurrentView] = useState<'list' | 'add' | 'edit'>('list');
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState({
@@ -164,7 +164,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ onBack }) => {
                   disabled={currentView === 'edit'}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  {currentView === 'edit' 
+                  {currentView === 'edit'
                     ? 'Category ID cannot be changed after creation'
                     : 'Use kebab-case format (e.g., "hot-drinks", "cold-beverages")'
                   }
@@ -253,7 +253,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ onBack }) => {
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="p-6">
             <h2 className="text-lg font-playfair font-medium text-black mb-4">Categories</h2>
-            
+
             {categories.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500 mb-4">No categories found</p>
@@ -282,23 +282,22 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ onBack }) => {
                         <p className="text-sm text-gray-500">ID: {category.id}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        category.active 
-                          ? 'bg-green-100 text-green-800' 
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${category.active
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
-                      }`}>
+                        }`}>
                         {category.active ? 'Active' : 'Inactive'}
                       </span>
-                      
+
                       <button
                         onClick={() => handleEditCategory(category)}
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
                       >
                         <Edit className="h-4 w-4" />
                       </button>
-                      
+
                       <button
                         onClick={() => handleDeleteCategory(category.id)}
                         className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors duration-200"

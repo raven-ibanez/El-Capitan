@@ -24,19 +24,19 @@ const SubNav: React.FC<SubNavProps> = ({ selectedCategory, onCategoryClick }) =>
               <button
                 onClick={() => onCategoryClick('all')}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border whitespace-nowrap ${selectedCategory === 'all'
-                    ? 'bg-captain-cyan text-captain-navy border-captain-cyan shadow-md shadow-captain-cyan/30'
-                    : 'bg-transparent text-captain-light border-captain-cyan/40 hover:border-captain-cyan hover:text-captain-cyan'
+                  ? 'bg-captain-cyan text-captain-navy border-captain-cyan shadow-md shadow-captain-cyan/30'
+                  : 'bg-transparent text-captain-light border-captain-cyan/40 hover:border-captain-cyan hover:text-captain-cyan'
                   }`}
               >
                 All
               </button>
-              {categories.map((c) => (
+              {categories.filter(c => c.id !== 'consumables').map((c) => (
                 <button
                   key={c.id}
                   onClick={() => onCategoryClick(c.id)}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border flex items-center space-x-1.5 whitespace-nowrap ${selectedCategory === c.id
-                      ? 'bg-captain-cyan text-captain-navy border-captain-cyan shadow-md shadow-captain-cyan/30'
-                      : 'bg-transparent text-captain-light border-captain-cyan/40 hover:border-captain-cyan hover:text-captain-cyan'
+                    ? 'bg-captain-cyan text-captain-navy border-captain-cyan shadow-md shadow-captain-cyan/30'
+                    : 'bg-transparent text-captain-light border-captain-cyan/40 hover:border-captain-cyan hover:text-captain-cyan'
                     }`}
                 >
                   <span>{c.icon}</span>

@@ -25,10 +25,11 @@ function MainApp() {
     setSelectedCategory(categoryId);
   };
 
-  // Filter menu items based on selected category
-  const filteredMenuItems = selectedCategory === 'all'
+  // Filter menu items based on selected category and hide consumables from main view
+  const filteredMenuItems = (selectedCategory === 'all'
     ? menuItems
-    : menuItems.filter(item => item.category === selectedCategory);
+    : menuItems.filter(item => item.category === selectedCategory)
+  ).filter(item => item.category !== 'consumables');
 
   return (
     <div className="min-h-screen bg-captain-navy font-outfit">

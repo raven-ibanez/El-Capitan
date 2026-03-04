@@ -98,7 +98,7 @@ Please confirm my order. Thank you!
         for (const item of cartItems) {
           if (item.trackInventory || (item.selectedVariation?.trackInventory)) {
             await updateStock(
-              item.id,
+              item.menuItemId,
               item.selectedVariation?.id || null,
               -item.quantity,
               'Sale via Website'

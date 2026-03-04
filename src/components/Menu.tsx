@@ -22,7 +22,7 @@ interface MenuProps {
 
 const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuantity }) => {
   const { categories } = useCategories();
-  const [activeCategory, setActiveCategory] = React.useState('hot-coffee');
+  const [activeCategory, setActiveCategory] = React.useState('water');
 
   // Preload images when menu items change
   React.useEffect(() => {
@@ -39,26 +39,10 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
     }
   }, [menuItems, activeCategory]);
 
-  const handleCategoryClick = (categoryId: string) => {
-    setActiveCategory(categoryId);
-    const element = document.getElementById(categoryId);
-    if (element) {
-      const headerHeight = 64; // Header height
-      const mobileNavHeight = 60; // Mobile nav height
-      const offset = headerHeight + mobileNavHeight + 20; // Extra padding
-      const elementPosition = element.offsetTop - offset;
-
-      window.scrollTo({
-        top: elementPosition,
-        behavior: 'smooth'
-      });
-    }
-  };
-
   React.useEffect(() => {
     if (categories.length > 0) {
-      // Set default to dim-sum if it exists, otherwise first category
-      const defaultCategory = categories.find(cat => cat.id === 'dim-sum') || categories[0];
+      // Set default to water if it exists, otherwise first category
+      const defaultCategory = categories.find(cat => cat.id === 'water') || categories[0];
       if (!categories.find(cat => cat.id === activeCategory)) {
         setActiveCategory(defaultCategory.id);
       }

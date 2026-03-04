@@ -41,6 +41,7 @@ export interface MenuItem {
 }
 
 export interface CartItem extends MenuItem {
+  menuItemId: string; // Original menu item UUID
   quantity: number;
   selectedVariation?: Variation;
   selectedAddOns?: AddOn[];
