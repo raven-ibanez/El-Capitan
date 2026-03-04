@@ -141,7 +141,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
               <span className="text-[10px] font-bold bg-red-600 text-white px-2 py-0.5 rounded-full whitespace-nowrap">OUT OF STOCK</span>
             ) : item.trackInventory && (item.stockQuantity ?? 0) <= (item.lowStockThreshold || 0) && (!item.variations || item.variations.length === 0) ? (
               <span className="text-[10px] font-bold bg-yellow-500 text-captain-navy px-2 py-0.5 rounded-full whitespace-nowrap">LOW STOCK</span>
-            ) : item.variations?.every(v => v.trackInventory && (v.stockQuantity ?? 0) === 0) ? (
+            ) : item.variations && item.variations.length > 0 && item.variations.every(v => v.trackInventory && (v.stockQuantity ?? 0) === 0) ? (
               <span className="text-[10px] font-bold bg-red-600 text-white px-2 py-0.5 rounded-full whitespace-nowrap">OUT OF STOCK</span>
             ) : null}
           </div>
